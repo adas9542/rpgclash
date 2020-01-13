@@ -59,15 +59,13 @@ class Person:
         return self.magic[i]["cost"]
 
     def choose_action(self):
-        print("Actions")
         i = 1
         for item in self.actions:
             print(str(i) + ":", item)
             i += 1
 
     def choose_magic(self):
-        print("Magic")
         i = 1
         for spell in self.magic:
-            print(str(i) + ":", spell["name"], "(cost:", str(spell["mp"]) + ")" )
+            print(str(i) + ":", spell["name"], "(cost:", str(spell["cost"]) + ")" )
             i += 1
