@@ -4,6 +4,10 @@ from classes.magic import Spell
 import random
 import math
 
+action = 0
+
+#include first hp and first mp n the beginning
+
 fire = Spell("Fire", 25, 370, "Black")
 ice = Spell("Ice", 13, 265, "Black")
 lightning = Spell("Lightning", 16, 267, "Black")
@@ -27,16 +31,6 @@ def mp_valid(player_mp, mp_cost):
     return int(player_mp) - mp_cost
 
 
-def stats_calc(x, spell_cost, damage, type):
-    if (x == 2 and type == "Black"):
-        player.mp -= spell_cost
-        enemy.take_dmg(damage)
-    elif (x == 1 and type == "Black"):
-        enemy.take_dmg(damage)
-    elif (x == 2 and type == "Black" and player.maxhp != player.mp):
-        player.hp += damage
-
-
 def act_statement():
     print("==============Your Turn==================")
     player.choose_action()
@@ -56,16 +50,31 @@ def domagic(option, valid):
         damage_inflicted = player.gen_spelldmg(option)
         spell_cost = player.spell_mp_cost(option)
         spell_name = player.get_spell_name(option)
+        action = 2
+
         type = player.get_type(option)
-        stats_calc(int(action), spell_cost, damage_inflicted, type)
         print("You chose " + spell_name)
+        stats_calc(int(action), spell_cost, damage_inflicted, type)
         return damage_inflicted
     elif int(valid) <= 0:
         print(bcolors.BOLD + "You don't have enough magic points" + bcolors.ENDC)
 
 
+def stats_calc(x, spell_cost, damage, type):
+    if (x == 2 and type == "Black"):  # magic
+        player.mp -= spell_cost
+        enemy.take_dmg(damage)
+    elif (x == 1 and type == "None"):  # attack
+        enemy.take_dmg(damage)
+    elif (x == 2 and type == "White" and player.maxhp != player.hp):  # heal
+        player.hp += damage
+        print("You healed by", damage, "hp")
+    elif (x == 2 and type == "White" and player.maxhp == player.hp):  # heal
+        print("You have max hp...")
+
 def doattack():
     spell_cost = 0
+    action = 1
     damage_inflicted = player.gen_damage()
     type = "None"
     stats_calc(int(action), spell_cost, damage_inflicted, type)
@@ -75,24 +84,24 @@ def doattack():
 
 while 1:
     action = int(act_statement())
-    if action == 2: #cure does not work
-                    #attack by itself does not work
-                    #enemy is unable to reach 0 hp
+    if action == 2:  # cure does not work
+        # enemy is unable to reach 0 hp
         option = magic_option()
-        valid = mp_valid(player.mp, player.spell_mp_cost(option))
+        valid = mp_valid(player.mp, player.spell_mp_cost(option)) #checks if you have enough mp
         damage_inflicted = domagic(option, valid)
+
 
     if action == 1 or valid <= 0:
         damage_inflicted = doattack()
 
-    print("Enemy has lost", damage_inflicted, "hp.")
+    #print("Enemy has lost", damage_inflicted, "hp.")
     print("===============Stats=====================")
     print("Enemy hp:", enemy.hp, "\nYour hp:", player.hp, "\nYour mp:", player.mp)
 
     print("=============Enemy's Turn================")
     enemy_dmg = enemy.gen_damage()
     player.take_dmg(enemy_dmg)
-    print(bcolors.FAIL + bcolors.BOLD + "Enemy attacks:", "\nYou lost ", enemy_dmg, " hp. You have", player.get_hp(),
+    print(bcolors.FAIL + bcolors.BOLD + "Enemy attacks:", "\nYou lost", enemy_dmg, "hp. You have", player.get_hp(),
           "hp left.", bcolors.ENDC)
     if player.hp == 0:
         print(bcolors.FAIL + bcolors.BOLD + "Battle is Over. You have lost!" + bcolors.ENDC)
